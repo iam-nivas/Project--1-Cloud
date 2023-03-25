@@ -1,0 +1,25 @@
+FROM openjdk:8-jre
+
+ENV JBOSS_ARCHIVE_NAME=wildfly-20.0.1.Final
+
+ENV JBOSS_HOME /opt/jboss/wildfly-20.0.1.Final/
+
+# ENV JAVA_HOME /usr/local/openjdk-8
+
+RUN mkdir -p $JBOSS_HOME
+
+RUN groupadd -r saiuser && useradd -r -s /bin/false -g saiuser saiuser
+
+COPY $JBOSS_ARCHIVE_NAME $JBOSS_HOME
+
+RUN $JBOSS_HOME/bin/add-user.sh admin admin@401 --silent
+
+EXPOSE  8999 10861
+
+COPY lendperfect.war  $JBOSS_HOME/standalone/deployments
+
+RUN chown -R saiuser:saiuser $JBOSS_HOME
+
+USER saiuser
+
+CMD ["/opt/jboss/wildfly-20.0.1.Final/bin/standalone.sh", "-b", "0.0.0.0", "-bmanagement", "0.0.0.0"]
